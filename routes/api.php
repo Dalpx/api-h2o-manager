@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\ClienteController;
 use App\Http\Controllers\Api\V1\DocumentoController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], f
     //Route::apiResource('customers', CustomerController::class);
     Route::apiResource('cliente', ClienteController::class);
     Route::apiResource('documentoFiscal', DocumentoController::class);
-
+    Route::apiResource('usuario', UserController::class);
     //Route::post('invoices/bulk', ['uses' => 'InvoiceController@bulkStore']);
 });
