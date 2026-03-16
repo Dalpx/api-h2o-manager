@@ -5,13 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; // Se mantiene para PAT
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, SoftDeletes;
 
     protected $table = 'usuario';
 
@@ -20,9 +21,10 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'nombre',
+        'email',
         'cedula',
         'password',
-        'rol',
+        'rol_id',
         'sucursal_id',
         'activo',
     ];
@@ -52,5 +54,10 @@ class User extends Authenticatable
     public function sucursal(): BelongsTo
     {
         return $this->belongsTo(Sucursal::class, 'sucursal_id');
+    }
+
+    public function rol(): BelongsTo
+    {
+        return $this->belongsTo(Rol::class, 'rol_id');
     }
 }

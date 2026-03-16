@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre')->comment('Ejemplo: 5L, 10L, 20L');
             $table->decimal('factor_consumo_agua', 15, 2)->default(0);
-            $table->boolean('activo')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

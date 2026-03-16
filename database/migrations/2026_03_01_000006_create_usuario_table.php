@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('email');
             $table->string('cedula')->unique();
             $table->string('password');
-            $table->string('rol');
+            $table->foreignId('rol_id')->constrained('rol');
             $table->foreignId('sucursal_id')->constrained('sucursal');
-            $table->boolean('activo')->default(true);
+            $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
         });

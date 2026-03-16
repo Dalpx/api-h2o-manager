@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('proveedor', function (Blueprint $table) {
+        Schema::create('abono_cxc', function (Blueprint $table) {
             $table->id();
-            $table->string('razon_social');
-            $table->string('rif');
-            $table->string('contacto')->nullable();
-            $table->string('telefono')->nullable();
-            $table->text('direccion')->nullable();
-            $table->softDeletes();
+            $table->foreignId('cxc_id')->constrained('cuenta_por_cobrar')->onDelete('cascade');
+            $table->foreignId('pago_id')->constrained('pago');
+            $table->decimal('monto', 15, 2);
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('proveedor');
+        Schema::dropIfExists('abono_cxc');
     }
 };

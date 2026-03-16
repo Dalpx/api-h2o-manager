@@ -16,4 +16,9 @@ class TarifaRecarga extends Model
         'creado_por',
         'audit_hash'
     ];
+
+    public function tamano($related, $foreignKey = null, $ownerKey = null, $relation = null)
+    {
+        return parent::belongsTo(TamanoRecarga::class, 'tamano_id');
+    }
 }

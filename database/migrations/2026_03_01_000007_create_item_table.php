@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('grava_iva')->default(true);
             $table->foreignId('proveedor_id')->constrained('proveedor');
             $table->foreignId('cuenta_contable_venta_id')->constrained('cuenta_contable');
-            $table->boolean('activo')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }
