@@ -72,9 +72,6 @@ class DocumentoController extends Controller
     public function show(DocumentoFiscal $documentoFiscal, Request $request)
     {
 
-        //Hay un error en el show el cual no permite seleccionar una unica entrada por id
-        //todo retorna null lmao
-
         // Obtenemos el parámetro de la URL (si existe)
         $incluirDoc = $request->query('incluirDetalle');
 
