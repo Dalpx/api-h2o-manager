@@ -13,6 +13,7 @@ class DocumentoQuery extends ApiFilter{
         'fecha' => ['eq', 'gt', 'lt', 'gte', 'lte'],
         'condicionesPago' => ['eq', 'ne'],
         'subtotal' => ['eq', 'gt', 'lt', 'gte', 'lte'],
+        'total' => ['eq', 'gt', 'lt', 'gte', 'lte'],
         'createdAt' => ['eq', 'gt', 'lt', 'gte', 'lte'],
         'updatedAt' => ['eq', 'gt', 'lt', 'gte', 'lte']
     ];

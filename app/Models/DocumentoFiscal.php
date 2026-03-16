@@ -9,6 +9,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DocumentoFiscal extends Model
 {
     protected $table = 'documento_fiscal';
+
+    protected $casts = [
+        'subtotal'  => 'float',    // Convierte a float con 2 decimales
+        'iva'       => 'float',
+    ];
+
     protected $fillable = [
         'sucursal_id',
         'tipo_doc',

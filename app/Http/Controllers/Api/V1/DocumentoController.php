@@ -17,12 +17,34 @@ class DocumentoController extends Controller
     public function index(Request $request)
     {
         $filter = new DocumentoQuery();
-        $filterItems = $filter->Transform($request);
-        $docs = DocumentoFiscal::where($filterItems);
-        $detalle = $request->query('incluirDetalle');
+        $filterItems = $filter->Transform($request); // Filtros automáticos
 
-        if ($detalle) {
-            $clients = $docs->with('detalles');
+        // Iniciamos la consulta con el Join
+        // Especificamos la tabla base para evitar ambigüedad en los selects
+        $docs = DocumentoFiscal::join('sucursal', 'documento_fiscal.sucursal_id', '=', 'sucursal.id')
+            ->select('documento_fiscal.*');
+
+        //Filtro manual por nombre de sucursal
+        if ($request->filled('sucursal')) {
+            $valor = $request->query('sucursal');
+
+            // Manejamos si el usuario envía ?sucursal[eq]=Valencia o solo ?sucursal=Valencia
+            $nombre = is_array($valor) ? ($valor['eq'] ?? null) : $valor;
+
+            if ($nombre) {
+                $docs->where('sucursal.nombre', 'like', "%{$nombre}%");
+            }
+        }
+
+        //Aplicamos los filtros de DocumentoQuery
+        // Agregamos el prefijo de la tabla a cada filtro para evitar errores de SQL
+        foreach ($filterItems as $item) {
+            $docs->where("documento_fiscal." . $item[0], $item[1], $item[2]);
+        }
+
+        // 4. Carga de detalles si se solicita
+        if ($request->query('incluirDetalle')) {
+            $docs->with('detalles');
         }
 
         return new DocumentoCollection($docs->paginate()->appends($request->query()));
@@ -47,20 +69,20 @@ class DocumentoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(DocumentoFiscal $documento)
+    public function show(DocumentoFiscal $documentoFiscal, Request $request)
     {
 
         //Hay un error en el show el cual no permite seleccionar una unica entrada por id
         //todo retorna null lmao
 
         // Obtenemos el parámetro de la URL (si existe)
-        $incluirDoc = request()->query('incluirDetalle');
+        $incluirDoc = $request->query('incluirDetalle');
 
         if ($incluirDoc) {
-            $documento->load('detalles');
+            $documentoFiscal->load('detalles');
         }
 
-        return new DocumentoResource($documento);
+        return new DocumentoResource($documentoFiscal);
     }
 
     /**

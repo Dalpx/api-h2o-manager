@@ -33,7 +33,7 @@ class DocumentoResource extends JsonResource
             'total'=> $this->subtotal + $this->iva,
             'estado'=> $this->estado,
             'createdAt'=> $this->created_at->format('d/m/Y H:i:s'),
-            'updatedAt'=> $this->updated_at?->format('d/m/Y H:i:s'),
+            'updatedAt'=> $this->updated_at?->format('d/m/Y H:i:s') ?? null,
             'detalles' => DocumentoDetalleResource::collection($this->whenLoaded('detalles')),
 
 
