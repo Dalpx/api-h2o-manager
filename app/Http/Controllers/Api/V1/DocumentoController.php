@@ -42,7 +42,7 @@ class DocumentoController extends Controller
             $docs->where("documento_fiscal." . $item[0], $item[1], $item[2]);
         }
 
-        // 4. Carga de detalles si se solicita
+        //Carga de detalles si se solicita
         if ($request->query('incluirDetalle')) {
             $docs->with('detalles');
         }
