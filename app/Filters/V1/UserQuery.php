@@ -5,23 +5,19 @@ namespace App\Filters\V1;
 use Illuminate\Http\Request;
 use App\Filters\ApiFilter;
 
-class DocumentoQuery extends ApiFilter{
+class UserQuery extends ApiFilter{
 
     protected $allowedParams = [
-        'tipoDoc' => ['eq'],
-        'serieCorrelativo' => ['eq'],
-        'fecha' => ['eq', 'gt', 'lt', 'gte', 'lte'],
-        'condicionesPago' => ['eq', 'ne'],
-        'subtotal' => ['eq', 'gt', 'lt', 'gte', 'lte'],
-        'total' => ['eq', 'gt', 'lt', 'gte', 'lte'],
+        'nombre' => ['eq'],
+        'email' => ['eq'],
+        'cedula' => ['eq'],
+        'rol' => ['eq'],
+        'sucursal' => ['eq', 'ne'],
         'createdAt' => ['eq', 'gt', 'lt', 'gte', 'lte'],
         'updatedAt' => ['eq', 'gt', 'lt', 'gte', 'lte']
     ];
 
     protected $columnMap = [
-    'tipoDoc' => 'tipo_doc',
-    'serieCorrelativo' => 'serie_correlativo',
-    'condicionesPago' => 'condiciones_pago',
     'createdAt' => 'created_at',
     'updatedAt' => 'updated_at'
     ];
@@ -34,6 +30,5 @@ class DocumentoQuery extends ApiFilter{
         'lt' => '<',
         'lte' => '<='
     ];
-
 
 }
