@@ -25,28 +25,25 @@ class UpdateUserRequest extends FormRequest
         $method = $this->method();
         $usuarioId = $this->route('usuario') ? $this->route('usuario')->id : null;
 
+        $baseRules = [
+            'nombre' =>    ['string', 'max:128'],
+            'email'  =>    ['email'],
+            'cedula' =>    ['string', 'unique:usuario,email,' . $usuarioId, 'regex:/^(V|E)[-]?\d{6,8}$/i'],
+            'rol_id' =>    ['exists:rol,id'],
+            'sucursal_id' => ['exists:sucursal,id'],
+        ];
+
+
         if ($method == 'PUT') {
-            return [
-                'nombre' =>    ['required', 'string', 'max:128'],
-                'email'  =>    ['required', 'email'],
-                'cedula' =>    ['required', 'string', 'unique:usuario,email,' . $usuarioId, 'regex:/^(V|E)[-]?\d{6,8}$/i'],
-                'rol_id' =>    ['required', 'exists:rol,id'],
-                'sucursal_id'=>['required', 'exists:sucursal,id' ],
-            ];
+            return array_map(fn($rule) => array_merge(['required'], $rule), $baseRules);
         } else {
-            return [
-                'nombre' =>    ['sometimes', 'required', 'string', 'max:128'],
-                'email'  =>    ['sometimes', 'required', 'email'],
-                'cedula' =>    ['sometimes', 'required', 'string', 'unique:usuario,email,' . $usuarioId, 'regex:/^(V|E)[-]?\d{6,8}$/i'],
-                'rol_id' =>    ['sometimes', 'required', 'exists:rol,id'],
-                'sucursal_id'=>['sometimes', 'required', 'exists:sucursal,id'],
-            ];
+            return array_map(fn($rule) => array_merge(['sometimes', 'required'], $rule), $baseRules);
         }
     }
 
     public function prepareForValidation()
     {
-       $this->mergeIfMissing([
+        $this->mergeIfMissing([
             'activo' => true
         ]);
     }
