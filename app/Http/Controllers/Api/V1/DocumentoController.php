@@ -6,8 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\DocumentoResource;
 use App\Http\Resources\V1\DocumentoCollection;
 use App\Filters\V1\DocumentoQuery;
+use App\Http\Requests\V1\BulkStoreDocumentoRequest;
+use App\Http\Requests\V1\StoreDocumentoRequest;
+use App\Http\Requests\V1\UpdateDocumentoRequest;
 use App\Models\DocumentoFiscal;
 use Illuminate\Http\Request;
+use App\Services\V1\DocumentoService;
 
 class DocumentoController extends Controller
 {
@@ -51,19 +55,24 @@ class DocumentoController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDocumentoRequest $request, DocumentoService $service)
     {
-        //
+        $documento = $service->store($request->validated());
+        return new DocumentoResource($documento);
+    }
+
+    public function bulkStore(BulkStoreDocumentoRequest $request, DocumentoService $service)
+    {
+        $datos = $request->validated()['facturas'];
+
+        $resultado = $service->storeBulk($datos);
+
+        return response()->json([
+            'mensaje' => 'Procesamiento de lote completado',
+            'resumen' => $resultado
+        ], 207);
     }
 
     /**
@@ -83,19 +92,14 @@ class DocumentoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDocumentoRequest $request, DocumentoFiscal $documentoFiscal, DocumentoService $service)
     {
-        //
+        // Pasamos el modelo actual y los datos nuevos al servicio
+        $actualizado = $service->update($documentoFiscal, $request->validated());
+
+        return new DocumentoResource($actualizado);
     }
 
     /**
@@ -103,6 +107,6 @@ class DocumentoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        return response()->json(['message'=> '¿Por qué borrarías una factura?']);
     }
 }
