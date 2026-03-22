@@ -1,5 +1,7 @@
 <?php
 
+// app/Http/Controllers/Api/V1/ClienteController.php
+
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
@@ -8,12 +10,19 @@ use App\Http\Resources\V1\ClienteCollection;
 use App\Filters\V1\ClienteQuery;
 use App\Models\Cliente;
 use Illuminate\Http\Request;
+use App\Http\Requests\V1\StoreClienteRequest;
+use App\Http\Requests\V1\UpdateClienteRequest;
+use App\Services\V1\ClienteService;
 
 class ClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $service;
+
+    public function __construct(ClienteService $service)
+    {
+        $this->service = $service;
+    }
+
     public function index(Request $request)
     {
         $filter = new ClienteQuery();
@@ -25,63 +34,43 @@ class ClienteController extends Controller
             $clients = $clients->with('documentoFiscal.detalles');
         }
 
-
         return new ClienteCollection($clients->paginate()->appends($request->query()));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreClienteRequest $request)
     {
-        //
+        $cliente = $this->service->store($request->validated());
+
+        return new ClienteResource($cliente);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Cliente $cliente)
     {
-        // Obtenemos el parámetro de la URL (si existe)
         $incluirDoc = request()->query('incluirDocFisc');
 
         if ($incluirDoc) {
-            // Cargamos las relaciones anidadas: Documentos -> Detalles
             $cliente->load('documentoFiscal.detalles');
         }
 
         return new ClienteResource($cliente);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(UpdateClienteRequest $request, Cliente $cliente)
     {
-        //
+        // Nota: Asegúrate de que la variable en la ruta api.php sea {cliente}
+        $actualizado = $this->service->update($cliente, $request->validated());
+
+        return new ClienteResource($actualizado);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Cliente $cliente)
     {
-        //
-    }
+        // Como usamos SoftDeletes, esto no lo borra de la DB, 
+        // solo le pone la fecha en 'deleted_at'
+        $cliente->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'message' => 'Cliente eliminado correctamente'
+        ], 200); // Puedes usar 204 No Content si no quieres devolver un body
     }
 }

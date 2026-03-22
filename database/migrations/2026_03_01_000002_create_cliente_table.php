@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('dias_credito')->default(0);
             $table->decimal('saldo', 15, 2)->default(0);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
