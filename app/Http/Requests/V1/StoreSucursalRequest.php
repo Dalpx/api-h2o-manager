@@ -16,7 +16,7 @@ class StoreSucursalRequest extends FormRequest
         return [
             'nombre'          => ['required', 'string', 'max:255', 'unique:sucursal,nombre'],
             'rif'             => ['required', 'string', 'max:255'],
-            'direccion'       => ['nullable', 'string'],
+            'direccion'       => ['required', 'string'],
             // Validamos que sea un array/JSON
             'correlativosDoc' => ['required', 'array'],
         ];

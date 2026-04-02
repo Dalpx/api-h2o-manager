@@ -4,47 +4,52 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         $method = $this->method();
         $usuarioId = $this->route('usuario') ? $this->route('usuario')->id : null;
 
-        $baseRules = [
-            'nombre' =>    ['string', 'max:128'],
-            'email'  =>    ['email'],
-            'cedula' =>    ['string', 'unique:usuario,email,' . $usuarioId, 'regex:/^(V|E)[-]?\d{6,8}$/i'],
-            'rol_id' =>    ['exists:rol,id'],
+        $rules = [
+            'nombre' => ['string', 'max:128'],
+            'email'  => ['email'],
+            'cedula' => [
+                'string', 
+                Rule::unique('usuario', 'cedula')->ignore($usuarioId)->whereNull('deleted_at'), 
+                'regex:/^(V|E)[-]?\d{6,8}$/i'
+            ],
+            'rol_id'      => ['exists:rol,id'],
             'sucursal_id' => ['exists:sucursal,id'],
+            // La contraseña es opcional (sometimes), pero si viene, debe ser válida
+            'password'    => ['sometimes', 'string', Password::min(8)->mixedCase()->numbers()],
         ];
 
-
-        if ($method == 'PUT') {
-            return array_map(fn($rule) => array_merge(['required'], $rule), $baseRules);
+        if ($method === 'PUT') {
+            // En PUT, todos los campos (excepto password) suelen ser requeridos
+            // Filtramos password para que no se vuelva 'required' por error
+            return array_map(function($key, $rule) {
+                return ($key === 'password') ? array_merge(['sometimes'], $rule) : array_merge(['required'], $rule);
+            }, array_keys($rules), $rules);
         } else {
-            return array_map(fn($rule) => array_merge(['sometimes', 'required'], $rule), $baseRules);
+            // En PATCH, todo es 'sometimes'
+            return array_map(fn($rule) => array_merge(['sometimes', 'required'], $rule), $rules);
         }
     }
 
-    public function prepareForValidation()
+    public function messages(): array
     {
-        $this->mergeIfMissing([
-            'activo' => true
-        ]);
+        return [
+            'password.min' => 'Si vas a cambiar la contraseña, debe tener al menos 8 caracteres.',
+            'cedula.unique' => 'Esta cédula ya pertenece a otro usuario.',
+            // ... puedes mantener tus otros mensajes aquí
+        ];
     }
 }
