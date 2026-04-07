@@ -14,4 +14,9 @@ class Sucursal extends Model
         'correlativos_doc'
     ];
     protected $casts = ['correlativos_doc' => 'array']; // Para manejar el JSON
+
+    public function movimientosInventario()
+    {
+        return $this->hasMany(MovimientoInventario::class, 'sucursal_id');
+    }
 }

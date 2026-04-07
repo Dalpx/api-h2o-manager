@@ -60,4 +60,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Rol::class, 'rol_id');
     }
+
+    public function movimientosRegistrados()
+    {
+        return $this->hasMany(MovimientoInventario::class, 'usuario_id');
+    }
 }
