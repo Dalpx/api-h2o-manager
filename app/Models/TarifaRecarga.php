@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TarifaRecarga extends Model
 {
@@ -17,8 +18,18 @@ class TarifaRecarga extends Model
         'audit_hash'
     ];
 
-    public function tamano($related, $foreignKey = null, $ownerKey = null, $relation = null)
+    public function tamano()
     {
         return parent::belongsTo(TamanoRecarga::class, 'tamano_id');
+    }
+
+    public function sucursal()
+    {
+        return parent::belongsTo(Sucursal::class, 'sucursal_id');
+    }
+
+    public function usuario()
+    {
+        return parent::belongsTo(User::class, 'creado_por');
     }
 }

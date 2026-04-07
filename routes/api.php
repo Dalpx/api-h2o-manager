@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\ProveedorController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\SucursalController;
+use App\Http\Controllers\Api\V1\TarifaRecargaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,5 +27,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], f
     Route::apiResource('sucursal', SucursalController::class);
     Route::apiResource('proveedor', ProveedorController::class);
     Route::apiResource('item', ItemController::class);
+    Route::apiResource('tarifaRecarga', TarifaRecargaController::class);
     //Route::post('invoices/bulk', ['uses' => 'InvoiceController@bulkStore']);
 });

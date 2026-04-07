@@ -17,7 +17,7 @@ class TamanoRecarga extends Model
         'updated_at'
     ];
 
-    public function tarifas($related, $foreignKey = null, $localKey = null)
+    public function tarifas()
     {
         return parent::hasMany(TarifaRecarga::class, 'tamano_id');
     }
