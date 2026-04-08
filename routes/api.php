@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\ClienteController;
 use App\Http\Controllers\Api\V1\DocumentoController;
+use App\Http\Controllers\Api\V1\InventarioExistenciaController;
 use App\Http\Controllers\Api\V1\ItemController;
 use App\Http\Controllers\Api\V1\MovimientoInventarioController;
 use App\Http\Controllers\Api\V1\ProveedorController;
@@ -24,11 +25,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], f
     Route::apiResource('documentoFiscal', DocumentoController::class);
 
     Route::apiResource('usuario', UserController::class);
-
     Route::apiResource('sucursal', SucursalController::class);
+
     Route::apiResource('proveedor', ProveedorController::class);
     Route::apiResource('item', ItemController::class);
     Route::apiResource('tarifaRecarga', TarifaRecargaController::class);
+    
     Route::apiResource('movimientoInventario', MovimientoInventarioController::class);
+    Route::apiResource('inventarioExistencia', InventarioExistenciaController::class);
     //Route::post('invoices/bulk', ['uses' => 'InvoiceController@bulkStore']);
 });

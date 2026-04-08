@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class InventarioExistencia extends Model
 {
     protected $table = 'inventario_existencia';
+    public $timestamps = false;
     public $incrementing = false; // Importante para llaves compuestas
     protected $primaryKey = [
         'sucursal_id',
@@ -17,4 +18,14 @@ class InventarioExistencia extends Model
         'item_id',
         'cantidad_actual'
     ];
+
+    public function sucursal()
+    {
+        return $this->belongsTo(Sucursal::class, 'sucursal_id');
+    }
+
+    public function item()
+    {
+        return $this->belongsTo(Item::class, 'item_id');
+    }
 }
