@@ -41,6 +41,13 @@ class ItemController extends Controller
         return new ItemCollection($items->paginate()->appends($request->query()));
     }
 
+    public function show(Item $item)
+    {
+
+        return new ItemResource($item);
+    }
+
+
     public function store(StoreItemRequest $request)
     {
         $item = $this->service->store($request->validated());

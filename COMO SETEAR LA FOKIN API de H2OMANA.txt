@@ -1,0 +1,12 @@
+COMO SETEAR LA FOKIN API de H2OMANAGER
+1.- INSTALA LARAGON CARAVERGA ( ESE TE TRAE TODO, EL PHP, EL LARAVEL QUE EL PATO QUE LA GUACHARACA)
+2.- CLONAR EL PROYECTO EN WWW DE LARAGON (EL ROOT PUES CARAVERGA)
+3.- ABRE LA TERMINAL Y EJECUTA LOS COMANDOS EN EL SIGUIENTE ORDEN
+	3.1- composer install
+	3.2- cp .env.example .env
+		3.2.1- Asegurarte de que el motor de la base de datos sea "mysql" sin las comillas y en minúscula.
+		3.2.2- Ajustar para que las credenciales sean "root" y sin contraseña. Deja el campo de contraseña pelao que solo quede el igual
+	3.3- php artisan key:generate
+	3.4- php artisan migrate
+
+Fecilidades ya debería estar funcionando la monda
