@@ -4,8 +4,9 @@ namespace App\Services\V1;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\DocumentoFiscal;
+use App\Models\InventarioExistencia;
 use Illuminate\Support\Carbon;
-use PDOException;
+use Illuminate\Validation\ValidationException;
 
 class DocumentoService
 {
@@ -14,10 +15,20 @@ class DocumentoService
      */
     public function store(array $data)
     {
-        $mappedData = $this->transform($data, now());
+        return DB::transaction(function () use ($data) {
+            // Primero validamos y descontamos inventario para evitar vender sin stock.
+            $this->descontarInventario((int) $data['sucursalId'], $data['detalles'] ?? []);
 
-        // Retornamos el modelo creado para que el controlador pueda usarlo en un Resource
-        return DocumentoFiscal::create($mappedData);
+            $mappedData = $this->transform($data, now());
+            $documento = DocumentoFiscal::create($mappedData);
+
+            $detalles = $this->transformDetalles($data['detalles'] ?? []);
+            if (!empty($detalles)) {
+                $documento->detalles()->createMany($detalles);
+            }
+
+            return $documento->fresh(['detalles.item']);
+        });
     }
 
     /**
@@ -73,5 +84,66 @@ class DocumentoService
         }
 
         return $res;
+    }
+
+    /**
+     * Traduce detalles desde JSON camelCase al esquema DB.
+     */
+    private function transformDetalles(array $detalles): array
+    {
+        return array_map(function ($d) {
+            return [
+                'item_id' => $d['itemId'],
+                'cantidad' => $d['cantidad'],
+                'precio_unit' => $d['precioUnitario'],
+                'iva_monto' => $d['ivaMonto'] ?? 0,
+                'total_linea' => $d['totalLineas'],
+                'tamano_id' => $d['tamanoId'] ?? null,
+                'costo_estimado' => $d['costoEstimado'] ?? null,
+            ];
+        }, $detalles);
+    }
+
+    /**
+     * Descuenta inventario por item en la sucursal del documento.
+     * Usa lockForUpdate para asegurar consistencia en concurrencia.
+     */
+    private function descontarInventario(int $sucursalId, array $detalles): void
+    {
+        $cantidadPorItem = [];
+        foreach ($detalles as $detalle) {
+            $itemId = (int) ($detalle['itemId'] ?? 0);
+            $cantidad = (float) ($detalle['cantidad'] ?? 0);
+            if ($itemId <= 0 || $cantidad <= 0) {
+                continue;
+            }
+            $cantidadPorItem[$itemId] = ($cantidadPorItem[$itemId] ?? 0) + $cantidad;
+        }
+
+        foreach ($cantidadPorItem as $itemId => $cantidadVenta) {
+            $existencia = InventarioExistencia::where('sucursal_id', $sucursalId)
+                ->where('item_id', $itemId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$existencia) {
+                throw ValidationException::withMessages([
+                    'detalles' => ["No existe inventario para el item {$itemId} en la sucursal {$sucursalId}."],
+                ]);
+            }
+
+            $stockActual = (float) $existencia->cantidad_actual;
+            if ($stockActual < $cantidadVenta) {
+                throw ValidationException::withMessages([
+                    'detalles' => ["Stock insuficiente para item {$itemId}. Disponible: {$stockActual}, solicitado: {$cantidadVenta}."],
+                ]);
+            }
+
+            $nuevoStock = $stockActual - $cantidadVenta;
+            DB::table('inventario_existencia')
+                ->where('sucursal_id', $sucursalId)
+                ->where('item_id', $itemId)
+                ->update(['cantidad_actual' => $nuevoStock]);
+        }
     }
 }

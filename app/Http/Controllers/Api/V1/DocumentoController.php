@@ -60,7 +60,7 @@ class DocumentoController extends Controller
     public function store(StoreDocumentoRequest $request, DocumentoService $service)
     {
         $documento = $service->store($request->validated());
-        return new DocumentoResource($documento);
+        return new DocumentoResource($documento->load('detalles.item'));
     }
 
     public function bulkStore(BulkStoreDocumentoRequest $request, DocumentoService $service)

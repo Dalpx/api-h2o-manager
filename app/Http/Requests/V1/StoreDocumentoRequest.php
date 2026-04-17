@@ -33,6 +33,12 @@ class StoreDocumentoRequest extends FormRequest
             'iva' => ['required', 'numeric', 'min:0'],
             'total' => ['required', 'numeric', 'min:0'],
             'estado' => ['required', 'string', 'max:255'],
+            'detalles' => ['required', 'array', 'min:1'],
+            'detalles.*.itemId' => ['required', 'integer', 'exists:item,id'],
+            'detalles.*.cantidad' => ['required', 'numeric', 'gt:0'],
+            'detalles.*.precioUnitario' => ['required', 'numeric', 'min:0'],
+            'detalles.*.ivaMonto' => ['nullable', 'numeric', 'min:0'],
+            'detalles.*.totalLineas' => ['required', 'numeric', 'min:0'],
         ];
     }
 
@@ -63,6 +69,16 @@ class StoreDocumentoRequest extends FormRequest
             'total.min' => 'El total no puede ser negativo.',
 
             'estado.required' => 'El estado de la factura es obligatorio.',
+
+            'detalles.required' => 'Debes enviar al menos una línea de detalle.',
+            'detalles.array' => 'El detalle del documento debe ser un arreglo.',
+            'detalles.min' => 'Debes enviar al menos una línea de detalle.',
+            'detalles.*.itemId.required' => 'Cada detalle debe incluir itemId.',
+            'detalles.*.itemId.exists' => 'Uno de los ítems enviados no existe.',
+            'detalles.*.cantidad.required' => 'Cada detalle debe incluir cantidad.',
+            'detalles.*.cantidad.gt' => 'La cantidad debe ser mayor a cero.',
+            'detalles.*.precioUnitario.required' => 'Cada detalle debe incluir precioUnitario.',
+            'detalles.*.totalLineas.required' => 'Cada detalle debe incluir totalLineas.',
         ];
     }
 
