@@ -65,4 +65,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(MovimientoInventario::class, 'usuario_id');
     }
+
+    public function getRoleName(): string
+    {
+        return match ($this->rol_id) {
+            1 => 'admin',
+            2 => 'gerente',
+            3 => 'cajero'
+        };
+    }
 }
