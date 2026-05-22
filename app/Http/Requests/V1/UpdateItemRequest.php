@@ -20,7 +20,7 @@ class UpdateItemRequest extends FormRequest
         $baseRules = [
             'sku' => ['string', Rule::unique('item', 'sku')->ignore($itemId)->whereNull('deleted_at')],
             'nombre' => ['string', 'max:255'],
-            'tipo' => [Rule::in(['PRODUCTO', 'SERVICIO'])],
+            'tipo' => [Rule::in(['PRODUCTO', 'SERVICIO', 'INSUMO'])],
             'unidadMedida' => ['string', 'max:10'],
             'gravaIva' => ['boolean'],
             'proveedorId' => ['integer', 'exists:proveedor,id'],
@@ -28,7 +28,7 @@ class UpdateItemRequest extends FormRequest
             'precioSugerido' => ['numeric', 'min:0'],
             'cuentaContableVentaId' => [
                 Rule::exists('cuenta_contable', 'id')->where(function ($query) {
-                    $query->whereIn('tipo', ['INGRESO', 'CUENTA_POR_COBRAR']);
+                    $query->whereIn('tipo', ['Ingreso', 'ingreso']);
                 }),
             ],
         ];

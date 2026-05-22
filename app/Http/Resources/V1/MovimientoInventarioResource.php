@@ -22,6 +22,9 @@ class MovimientoInventarioResource extends JsonResource
             'usuarioNombre' => $this->usuario ? $this->usuario->nombre : 'Desconocido', // o 'username' según tu tabla
             
             'createdAt'     => $this->created_at,
+            'detalles'      => MovimientoInventarioDetalleResource::collection(
+                $this->whenLoaded('detalles')
+            ),
         ];
     }
 }

@@ -3,21 +3,31 @@
 namespace App\Services\V1;
 
 use App\Models\InventarioExistencia;
+use Illuminate\Support\Facades\DB;
 
 class InventarioExistenciaService
 {
-    public function updateOrCreate(array $data)
+    public function __construct(
+        protected InventarioService $inventarioService
+    ) {}
+
+    public function updateOrCreate(array $data): InventarioExistencia
     {
-        // Al ser llave compuesta, usamos updateOrCreate de Eloquent
-        return InventarioExistencia::updateOrCreate(
-            [
-                'sucursal_id' => $data['sucursalId'],
-                'item_id' => $data['itemId']
-            ],
-            [
-                'cantidad_actual' => $data['cantidadActual']
-            ]
-        );
+        $sucursalId = (int) $data['sucursalId'];
+        $itemId = (int) $data['itemId'];
+        $cantidad = (float) $data['cantidadActual'];
+
+        $this->inventarioService->asegurarExistencia($sucursalId, $itemId, 0);
+
+        DB::table('inventario_existencia')
+            ->where('sucursal_id', $sucursalId)
+            ->where('item_id', $itemId)
+            ->update(['cantidad_actual' => $cantidad]);
+
+        return InventarioExistencia::query()
+            ->where('sucursal_id', $sucursalId)
+            ->where('item_id', $itemId)
+            ->firstOrFail();
     }
 
     public function transform(array $data): array
@@ -34,6 +44,7 @@ class InventarioExistenciaService
                 $res[$dbKey] = $data[$jsonKey];
             }
         }
+
         return $res;
     }
 }

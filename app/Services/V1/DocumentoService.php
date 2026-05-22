@@ -4,28 +4,44 @@ namespace App\Services\V1;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\DocumentoFiscal;
-use App\Models\InventarioExistencia;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\ValidationException;
 
 class DocumentoService
 {
+    public function __construct(
+        protected InventarioService $inventarioService,
+        protected CreditoClienteService $creditoClienteService,
+        protected ContabilidadAsientoService $contabilidadAsientoService
+    ) {}
+
     /**
      * Procesa un solo documento.
      */
     public function store(array $data)
     {
         return DB::transaction(function () use ($data) {
-            // Primero validamos y descontamos inventario para evitar vender sin stock.
-            $this->descontarInventario((int) $data['sucursalId'], $data['detalles'] ?? []);
+            $sucursalId = (int) $data['sucursalId'];
+            $referencia = $data['serieCorrelativo'] ?? 'Venta';
+            $usuarioId = (int) ($data['usuarioId'] ?? 1);
+
+            $this->inventarioService->registrarSalidaPorVenta(
+                $sucursalId,
+                $data['detalles'] ?? [],
+                $referencia,
+                $usuarioId
+            );
 
             $mappedData = $this->transform($data, now());
             $documento = DocumentoFiscal::create($mappedData);
 
             $detalles = $this->transformDetalles($data['detalles'] ?? []);
-            if (!empty($detalles)) {
+            if (! empty($detalles)) {
                 $documento->detalles()->createMany($detalles);
             }
+
+            $this->creditoClienteService->registrarPorVenta($documento, $data);
+
+            $this->contabilidadAsientoService->registrarVenta($documento, $data);
 
             return $documento->fresh(['detalles.item']);
         });
@@ -104,46 +120,4 @@ class DocumentoService
         }, $detalles);
     }
 
-    /**
-     * Descuenta inventario por item en la sucursal del documento.
-     * Usa lockForUpdate para asegurar consistencia en concurrencia.
-     */
-    private function descontarInventario(int $sucursalId, array $detalles): void
-    {
-        $cantidadPorItem = [];
-        foreach ($detalles as $detalle) {
-            $itemId = (int) ($detalle['itemId'] ?? 0);
-            $cantidad = (float) ($detalle['cantidad'] ?? 0);
-            if ($itemId <= 0 || $cantidad <= 0) {
-                continue;
-            }
-            $cantidadPorItem[$itemId] = ($cantidadPorItem[$itemId] ?? 0) + $cantidad;
-        }
-
-        foreach ($cantidadPorItem as $itemId => $cantidadVenta) {
-            $existencia = InventarioExistencia::where('sucursal_id', $sucursalId)
-                ->where('item_id', $itemId)
-                ->lockForUpdate()
-                ->first();
-
-            if (!$existencia) {
-                throw ValidationException::withMessages([
-                    'detalles' => ["No existe inventario para el item {$itemId} en la sucursal {$sucursalId}."],
-                ]);
-            }
-
-            $stockActual = (float) $existencia->cantidad_actual;
-            if ($stockActual < $cantidadVenta) {
-                throw ValidationException::withMessages([
-                    'detalles' => ["Stock insuficiente para item {$itemId}. Disponible: {$stockActual}, solicitado: {$cantidadVenta}."],
-                ]);
-            }
-
-            $nuevoStock = $stockActual - $cantidadVenta;
-            DB::table('inventario_existencia')
-                ->where('sucursal_id', $sucursalId)
-                ->where('item_id', $itemId)
-                ->update(['cantidad_actual' => $nuevoStock]);
-        }
-    }
 }

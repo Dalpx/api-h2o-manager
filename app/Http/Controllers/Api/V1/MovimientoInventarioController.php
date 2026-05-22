@@ -27,7 +27,7 @@ class MovimientoInventarioController extends Controller
         $queryItems = $filter->transform($request);
 
         // Aplicamos Eager Loading para las relaciones
-        $movimientos = MovimientoInventario::with(['sucursal', 'usuario']);
+        $movimientos = MovimientoInventario::with(['sucursal', 'usuario', 'detalles.item']);
 
         if ($queryItems) {
             $movimientos->where($queryItems);
@@ -44,7 +44,7 @@ class MovimientoInventarioController extends Controller
 
     public function show(MovimientoInventario $movimientoInventario)
     {
-        return new MovimientoInventarioResource($movimientoInventario->load(['sucursal', 'usuario']));
+        return new MovimientoInventarioResource($movimientoInventario->load(['sucursal', 'usuario', 'detalles.item']));
     }
 
     public function update(UpdateMovimientoInventarioRequest $request, MovimientoInventario $movimientoInventario)

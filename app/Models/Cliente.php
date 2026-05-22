@@ -29,4 +29,9 @@ class Cliente extends Model
     {
         return $this->hasMany(DocumentoFiscal::class, 'cliente_id');
     }
+
+    public function cuentasPorCobrar(): HasMany
+    {
+        return $this->hasMany(CuentaPorCobrar::class, 'cliente_id');
+    }
 }

@@ -41,6 +41,6 @@ class MovimientoInventario extends Model
     public function detalles(): HasMany
     {
         // Asumiendo que la tabla de detalles se llamará 'movimiento_inventario_detalle'
-        return $this->hasMany(MovimientoInventarioDetalle::class, 'movimiento_id');
+        return $this->hasMany(MovimientoInventarioDetalle::class, 'mov_id');
     }
 }

@@ -7,9 +7,16 @@ use Illuminate\Support\Carbon;
 
 class ItemService
 {
+    public function __construct(
+        protected InventarioService $inventarioService
+    ) {}
+
     public function store(array $data)
     {
-        return Item::create($this->transform($data, now()));
+        $item = Item::create($this->transform($data, now()));
+        $this->inventarioService->inicializarExistenciasParaItem($item->id);
+
+        return $item;
     }
 
     public function update(Item $item, array $data)

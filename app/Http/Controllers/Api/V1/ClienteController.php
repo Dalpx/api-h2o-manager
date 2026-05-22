@@ -12,16 +12,17 @@ use App\Models\Cliente;
 use Illuminate\Http\Request;
 use App\Http\Requests\V1\StoreClienteRequest;
 use App\Http\Requests\V1\UpdateClienteRequest;
+use App\Services\V1\AbonoClienteService;
 use App\Services\V1\ClienteService;
+use App\Http\Resources\V1\CuentaPorCobrarResource;
+use App\Http\Requests\V1\StoreAbonoClienteRequest;
 
 class ClienteController extends Controller
 {
-    protected $service;
-
-    public function __construct(ClienteService $service)
-    {
-        $this->service = $service;
-    }
+    public function __construct(
+        protected ClienteService $service,
+        protected AbonoClienteService $abonoService
+    ) {}
 
     public function index(Request $request)
     {
@@ -72,5 +73,22 @@ class ClienteController extends Controller
         return response()->json([
             'message' => 'Cliente eliminado correctamente'
         ], 200); // Puedes usar 204 No Content si no quieres devolver un body
+    }
+
+    public function cuentasPorCobrar(Cliente $cliente)
+    {
+        $cuentas = $this->abonoService->listarPendientes($cliente);
+
+        return CuentaPorCobrarResource::collection($cuentas);
+    }
+
+    public function registrarAbono(StoreAbonoClienteRequest $request, Cliente $cliente)
+    {
+        $resultado = $this->abonoService->registrar($cliente, $request->validated());
+
+        return response()->json([
+            'message' => 'Abono registrado correctamente.',
+            'data' => $resultado,
+        ], 201);
     }
 }

@@ -17,7 +17,7 @@ class StoreItemRequest extends FormRequest
         return [
             'sku' => ['required', 'string', Rule::unique('item', 'sku')->whereNull('deleted_at')],
             'nombre' => ['required', 'string', 'max:255'],
-            'tipo' => ['required', Rule::in(['PRODUCTO', 'SERVICIO'])],
+            'tipo' => ['required', Rule::in(['PRODUCTO', 'SERVICIO', 'INSUMO'])],
             'unidadMedida' => ['required', 'string', 'max:10'],
             'gravaIva' => ['required', 'boolean'],
             'proveedorId' => ['required', 'integer', 'exists:proveedor,id'],
@@ -27,7 +27,7 @@ class StoreItemRequest extends FormRequest
                 'required',
                 // Validamos que la cuenta exista y que sea de tipo ingreso/venta
                 Rule::exists('cuenta_contable', 'id')->where(function ($query) {
-                    $query->whereIn('tipo', ['Activo', 'activo', 'Ingreso', 'ingreso']); // Ajusta según tus nombres reales en DB
+                    $query->whereIn('tipo', ['Ingreso', 'ingreso']);
                 }),
             ],
         ];

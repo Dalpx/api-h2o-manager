@@ -24,6 +24,7 @@ class StoreDocumentoRequest extends FormRequest
     {
         return [
             'sucursalId' => ['required', 'integer', 'exists:sucursal,id'],
+            'usuarioId' => ['nullable', 'integer', 'exists:usuario,id'],
             'tipoDoc' => ['required', 'string', Rule::in('Factura','Nota de Crédito')],
             'serieCorrelativo' => ['required', 'string', 'max:255', 'unique:documento_fiscal,serie_correlativo'],
             'fecha' => ['required', 'date_format:Y-m-d H:i:s'],

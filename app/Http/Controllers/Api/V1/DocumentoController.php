@@ -48,7 +48,7 @@ class DocumentoController extends Controller
 
         //Carga de detalles si se solicita
         if ($request->query('incluirDetalle')) {
-            $docs->with('detalles');
+            $docs->with(['detalles.item']);
         }
 
         return new DocumentoCollection($docs->paginate()->appends($request->query()));
@@ -85,7 +85,7 @@ class DocumentoController extends Controller
         $incluirDoc = $request->query('incluirDetalle');
 
         if ($incluirDoc) {
-            $documentoFiscal->load('detalles');
+            $documentoFiscal->load(['detalles.item']);
         }
 
         return new DocumentoResource($documentoFiscal);

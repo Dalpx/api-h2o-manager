@@ -23,7 +23,8 @@ class CuentaPorCobrar extends Model
         return $this->belongsTo(Cliente::class);
     }
 
-    public function documento(): BelongsTo {
+    public function documento(): BelongsTo
+    {
         return $this->belongsTo(DocumentoFiscal::class, 'doc_id');
     }
 
