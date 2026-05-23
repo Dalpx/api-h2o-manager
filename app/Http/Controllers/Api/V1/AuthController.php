@@ -13,11 +13,36 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request): JsonResponse
+    /*public function login(LoginRequest $request): JsonResponse
     {
         $user = User::where('email', $request->validated('email'))->first();
 
         if (! $user || ! Hash::check($request->validated('password'), $user->password)) {
+            return response()->json([
+                'message' => 'Correo o contraseña incorrectos.',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $user->tokens()->delete();
+        $user->load(['rol', 'sucursal']);
+        $token = $user->createToken('spa-login')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => new AuthUserResource($user),
+        ]);
+    }*/
+
+    public function login(LoginRequest $request): JsonResponse
+    {
+        // Capturamos el array completo de datos que pasaron la validación
+        $credentials = $request->validated();
+
+        // Buscamos al usuario usando la clave del array
+        $user = User::where('email', $credentials['email'])->first();
+
+        // Validamos la contraseña extrayendo el string plano correcto del array
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'message' => 'Correo o contraseña incorrectos.',
             ], Response::HTTP_UNAUTHORIZED);
