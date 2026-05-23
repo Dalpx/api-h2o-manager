@@ -35,13 +35,12 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        // Capturamos el array completo de datos que pasaron la validación
+        // Retorna el array con los campos validados
         $credentials = $request->validated();
 
-        // Buscamos al usuario usando la clave del array
         $user = User::where('email', $credentials['email'])->first();
 
-        // Validamos la contraseña extrayendo el string plano correcto del array
+        // $credentials['password'] entrega el string exacto que Hash::check necesita
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             return response()->json([
                 'message' => 'Correo o contraseña incorrectos.',
